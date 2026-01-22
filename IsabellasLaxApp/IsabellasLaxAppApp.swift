@@ -11,7 +11,7 @@ import SwiftUI
 struct IsabellasLaxAppApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            framsida()
         }
     }
 }
