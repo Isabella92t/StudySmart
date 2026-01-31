@@ -44,7 +44,7 @@ struct FolderDetailView: View {
                 NavigationLink {
                     FlashcardsView(folder: folder)
                 } label: {
-                    Label("Göra flashcards", systemImage: "rectangle.stack.badge.plus")
+                    Label("Skapa flashcards", systemImage: "rectangle.stack.badge.plus")
                 }
                 NavigationLink {
                     PracticeModeView(folder: folder)
