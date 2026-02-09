@@ -132,105 +132,114 @@ struct PracticeModeView: View {
                 .padding()
             } else {
                 VStack(spacing: 20) {
-                    FlippableCard(isFlipped: $showingAnswer) {
-                        VStack(spacing: 8) {
-                            Text(shuffledCards[currentIndex].question)
-                                .font(.title3)
-                                .multilineTextAlignment(.center)
-                                .padding()
-                            Text("(Fråga)")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        .padding()
-                    } back: {
-                        VStack(spacing: 8) {
-                            Text(shuffledCards[currentIndex].answer)
-                                .font(.title3)
-                                .multilineTextAlignment(.center)
-                                .padding()
-                            Text("(Svar)")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        .padding()
-                    }
-                    .frame(maxWidth: .infinity, minHeight: 220, maxHeight: 320)
-                    .padding(.horizontal)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) {
-                            showingAnswer.toggle()
-                        }
-                    }
-
-                    HStack(spacing: 16) {
-                        Button {
-                            mark(correct: false)
-                        } label: {
-                            Label("Lägg undan", systemImage: "xmark.circle")
-                        }
-                        .buttonStyle(.bordered)
-                        .tint(.red)
-                        .scaleEffect(layAsidePressed ? 0.95 : 1.0)
-                        .offset(y: layAsidePressed ? 1 : 0)
-                        .animation(.spring(response: 0.2, dampingFraction: 0.8), value: layAsidePressed)
-                        .simultaneousGesture(
-                            DragGesture(minimumDistance: 0)
-                                .onChanged { _ in
-                                    if layAsidePressed == false {
-                                        layAsidePressed = true
-                                    }
-                                }
-                                .onEnded { _ in
-                                    layAsidePressed = false
-                                }
-                        )
-
-                        Button {
-                            mark(correct: true)
-                        } label: {
-                            Label("Nästa", systemImage: "checkmark.circle")
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.green)
-                    }
-
-                    Text("\(currentIndex + 1) / \(shuffledCards.count)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-
-                    if !laidAside.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack(spacing: 8) {
-                                Image(systemName: "tray")
-                                Text("Undanlagda (") + Text("\(laidAside.count)") + Text(")")
+                    if currentIndex < shuffledCards.count {
+                        FlippableCard(isFlipped: $showingAnswer) {
+                            VStack(spacing: 8) {
+                                Text(shuffledCards[currentIndex].question)
+                                    .font(.title3)
+                                    .multilineTextAlignment(.center)
+                                    .padding()
+                                Text("(Fråga)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
                             }
-                            .font(.headline)
-
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 8) {
-                                    ForEach(laidAside) { card in
-                                        Text(card.question)
-                                            .font(.caption)
-                                            .padding(.horizontal, 10)
-                                            .padding(.vertical, 6)
-                                            .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Color.gray.opacity(0.12)))
-                                            .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Color.gray.opacity(0.25)))
-                                            .lineLimit(1)
-                                    }
-                                }
+                            .padding()
+                        } back: {
+                            VStack(spacing: 8) {
+                                Text(shuffledCards[currentIndex].answer)
+                                    .font(.title3)
+                                    .multilineTextAlignment(.center)
+                                    .padding()
+                                Text("(Svar)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
                             }
+                            .padding()
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 220, maxHeight: 320)
+                        .padding(.horizontal)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) {
+                                showingAnswer.toggle()
+                            }
+                        }
 
+                        HStack(spacing: 16) {
                             Button {
-                                practiceLaidAside()
+                                mark(correct: false)
                             } label: {
-                                Label("Öva undanlagda", systemImage: "arrow.triangle.2.circlepath")
+                                Label("Lägg undan", systemImage: "xmark.circle")
                             }
                             .buttonStyle(.bordered)
+                            .tint(.red)
+                            .scaleEffect(layAsidePressed ? 0.95 : 1.0)
+                            .offset(y: layAsidePressed ? 1 : 0)
+                            .animation(.spring(response: 0.2, dampingFraction: 0.8), value: layAsidePressed)
+                            .simultaneousGesture(
+                                DragGesture(minimumDistance: 0)
+                                    .onChanged { _ in
+                                        if layAsidePressed == false {
+                                            layAsidePressed = true
+                                        }
+                                    }
+                                    .onEnded { _ in
+                                        layAsidePressed = false
+                                    }
+                            )
+
+                            Button {
+                                mark(correct: true)
+                            } label: {
+                                Label("Nästa", systemImage: "checkmark.circle")
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.green)
                         }
+
+                        Text("\(currentIndex + 1) / \(shuffledCards.count)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                        if !laidAside.isEmpty {
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "tray")
+                                    Text("Undanlagda (") + Text("\(laidAside.count)") + Text(")")
+                                }
+                                .font(.headline)
+
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 8) {
+                                        ForEach(laidAside) { card in
+                                            Text(card.question)
+                                                .font(.caption)
+                                                .padding(.horizontal, 10)
+                                                .padding(.vertical, 6)
+                                                .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Color.gray.opacity(0.12)))
+                                                .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Color.gray.opacity(0.25)))
+                                                .lineLimit(1)
+                                        }
+                                    }
+                                }
+
+                                Button {
+                                    practiceLaidAside()
+                                } label: {
+                                    Label("Öva undanlagda", systemImage: "arrow.triangle.2.circlepath")
+                                }
+                                .buttonStyle(.bordered)
+                            }
+                            .padding()
+                            .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.gray.opacity(0.07)))
+                        }
+                    } else {
+                        ContentUnavailableView(
+                            "Inga flashcards",
+                            systemImage: "rectangle.stack.badge.plus",
+                            description: Text("Lägg till flashcards för att börja öva.")
+                        )
                         .padding()
-                        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.gray.opacity(0.07)))
                     }
                 }
                 .padding()
@@ -242,6 +251,16 @@ struct PracticeModeView: View {
             cards = store.load(for: folder.id)
             shuffledCards = cards.shuffled()
             laidAside = store.loadLaidAside(for: folder.id)
+
+            if cards.isEmpty {
+                shuffledCards = []
+                finished = false
+                currentIndex = 0
+            }
+
+            finished = false
+            currentIndex = 0
+            showingAnswer = false
         }
     }
 

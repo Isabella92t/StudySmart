@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct StartView: View {
-    @StateObject private var store = FlashcardsStore()
 
     var body: some View {
         NavigationStack {
