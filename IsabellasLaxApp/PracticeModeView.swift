@@ -16,8 +16,9 @@ struct FlippableCard<Front: View, Back: View>: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(.ultraThickMaterial)
+                .fill(isFlipped ? Color.blue.opacity(0.25) : Color.blue.opacity(0.15))
                 .shadow(radius: 4)
+                .animation(.easeInOut, value: isFlipped)
 
             ZStack { front }
                 .opacity(rotation < 90 ? 1 : 0)
@@ -54,6 +55,8 @@ struct PracticeModeView: View {
     @State private var finished: Bool = false
     @State private var layAsidePressed: Bool = false
 
+    @State private var laidAside: [Flashcard] = []
+
     var body: some View {
         VStack(spacing: 16) {
             Text(folder.title)
@@ -62,7 +65,64 @@ struct PracticeModeView: View {
                 .padding(.top)
 
             if finished {
-                EmptyView()
+                VStack(spacing: 12) {
+                    Image(systemName: "checkmark.seal.fill")
+                        .font(.system(size: 48))
+                        .foregroundStyle(.green)
+                    Text("Klar!")
+                        .font(.title2)
+                        .bold()
+                    Text("Du har övat färdigt alla kort.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+
+                    if !laidAside.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Image(systemName: "tray")
+                                Text("Undanlagda kort (") + Text("\(laidAside.count)") + Text(")")
+                            }
+                            .font(.headline)
+
+                            // A compact list/box of laid-aside items
+                            VStack(alignment: .leading, spacing: 6) {
+                                ForEach(laidAside.prefix(5)) { card in
+                                    Text("• \(card.question)")
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(1)
+                                }
+                                if laidAside.count > 5 {
+                                    Text("… och \(laidAside.count - 5) fler")
+                                        .font(.footnote)
+                                        .foregroundStyle(.tertiary)
+                                }
+                            }
+
+                            Button {
+                                practiceLaidAside()
+                            } label: {
+                                Label("Öva undanlagda", systemImage: "arrow.triangle.2.circlepath")
+                            }
+                            .buttonStyle(.borderedProminent)
+                            
+                            Button(role: .destructive) {
+                                laidAside = []
+                                store.clearLaidAside(for: folder.id)
+                            } label: {
+                                Label("Rensa undanlagda", systemImage: "trash")
+                            }
+                            .buttonStyle(.bordered)
+                        }
+                        .padding()
+                        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.gray.opacity(0.1)))
+                        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Color.gray.opacity(0.25)))
+                    }
+
+                    Button("Börja om") { restart() }
+                        .buttonStyle(.bordered)
+                }
+                .padding()
             } else if shuffledCards.isEmpty {
                 ContentUnavailableView(
                     "Inga flashcards",
@@ -139,6 +199,39 @@ struct PracticeModeView: View {
                     Text("\(currentIndex + 1) / \(shuffledCards.count)")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+
+                    if !laidAside.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "tray")
+                                Text("Undanlagda (") + Text("\(laidAside.count)") + Text(")")
+                            }
+                            .font(.headline)
+
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 8) {
+                                    ForEach(laidAside) { card in
+                                        Text(card.question)
+                                            .font(.caption)
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 6)
+                                            .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Color.gray.opacity(0.12)))
+                                            .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Color.gray.opacity(0.25)))
+                                            .lineLimit(1)
+                                    }
+                                }
+                            }
+
+                            Button {
+                                practiceLaidAside()
+                            } label: {
+                                Label("Öva undanlagda", systemImage: "arrow.triangle.2.circlepath")
+                            }
+                            .buttonStyle(.bordered)
+                        }
+                        .padding()
+                        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.gray.opacity(0.07)))
+                    }
                 }
                 .padding()
             }
@@ -148,11 +241,21 @@ struct PracticeModeView: View {
         .onAppear {
             cards = store.load(for: folder.id)
             shuffledCards = cards.shuffled()
+            laidAside = store.loadLaidAside(for: folder.id)
         }
     }
 
     private func mark(correct: Bool) {
-        if correct { correctCount += 1 } else { incorrectCount += 1 }
+        if correct {
+            correctCount += 1
+        } else {
+            incorrectCount += 1
+            let card = shuffledCards[currentIndex]
+            if laidAside.contains(card) == false {
+                laidAside.append(card)
+                store.saveLaidAside(laidAside, for: folder.id)
+            }
+        }
         advance()
     }
 
@@ -161,25 +264,34 @@ struct PracticeModeView: View {
         if currentIndex + 1 < shuffledCards.count {
             currentIndex += 1
         } else {
-            restart()
+            finished = true
         }
     }
 
     private func restart() {
-        currentIndex = 0
-        showingAnswer = false
         finished = false
         correctCount = 0
         incorrectCount = 0
-        shuffledCards = cards.shuffled()
+        showingAnswer = false
         currentIndex = 0
+        shuffledCards = cards.shuffled()
+    }
+
+    private func practiceLaidAside() {
+        guard !laidAside.isEmpty else { return }
+        finished = false
+        showingAnswer = false
+        correctCount = 0
+        incorrectCount = 0
+        currentIndex = 0
+        shuffledCards = laidAside.shuffled()
     }
 }
 
 struct PracticeModeView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationStack {
-            PracticeModeView(folder: Folder(title: "Biologi", description: "Kapitel 3"))
+            PracticeModeView(folder: Folder(title: "Ämne", description: "Kapitel 1"))
         }
     }
 }
