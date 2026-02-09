@@ -1,5 +1,5 @@
 //
-//  framsida.swift
+//  StartView.swift
 //  IsabellasLaxApp
 //
 //  Created by Isabella Heidari on 2026-01-21.
@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct StartView: View {
+
     var body: some View {
         NavigationStack {
             VStack {
@@ -27,6 +28,8 @@ struct StartView: View {
                         .background(Color.green)
                         .cornerRadius(60)
                 }
+                .padding(.bottom, 24)
+
                 Spacer()
             }
             .padding(.top, 100)

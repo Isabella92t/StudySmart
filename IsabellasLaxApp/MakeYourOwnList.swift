@@ -6,57 +6,8 @@
 //
 
 import SwiftUI
+import Foundation
 
-struct Folder: Identifiable, Hashable, Codable {
-    let id: UUID
-    var title: String
-    var description: String
-
-    init(id: UUID = UUID(), title: String, description: String) {
-        self.id = id
-        self.title = title
-        self.description = description
-    }
-}
-
-// Detaljvy som visar titel och beskrivning, med länk till Flashcards
-struct FolderDetailView: View {
-    let folder: Folder
-
-    var body: some View {
-        List {
-            Section {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(folder.title)
-                        .font(.largeTitle)
-                        .bold()
-
-                    if !folder.description.isEmpty {
-                        Text(folder.description)
-                            .font(.body)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .padding(.vertical, 4)
-            }
-
-            Section {
-                NavigationLink {
-                    FlashcardsView(folder: folder)
-                } label: {
-                    Label("Skapa flashcards", systemImage: "rectangle.stack.badge.plus")
-                }
-                NavigationLink {
-                    PracticeModeView(folder: folder)
-                } label: {
-                    Label("Öva flashcards", systemImage: "bolt.circle")
-                }
-            }
-        }
-        .navigationTitle(folder.title)
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
 
 struct MakeYourOwnList: View {
     
@@ -67,7 +18,7 @@ struct MakeYourOwnList: View {
     @State private var folders: [Folder] = []
     private let foldersKey = "savedFolders"
     
-    private let columns = [GridItem(.adaptive(minimum: 100), spacing: 8)]
+    private let columns = [GridItem(.adaptive(minimum: 140), spacing: 8)]
     private let palette: [Color] = [.blue, .green, .yellow, .orange, .red, .purple]
     
     // Spara mapparna till UserDefaults
@@ -102,7 +53,7 @@ struct MakeYourOwnList: View {
                     showField.toggle()
                 } label: {
                     HStack (spacing: 8) {
-                        Label("Add", systemImage: "pencil.and.list.clipboard")
+                        Label("+", systemImage: "pencil.and.list.clipboard")
                     }
                     .font(.largeTitle)
                 }
@@ -110,8 +61,8 @@ struct MakeYourOwnList: View {
                 Spacer(minLength: 16)
                 
                 if showField {
-                    TextField("Skriv här..", text: $title)
-                    TextField("Beskrivning", text: $description)
+                    TextField("Ämne..", text: $title)
+                    TextField("Beskrivning..", text: $description)
                     
                     Button("Done") {
                         let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -130,12 +81,17 @@ struct MakeYourOwnList: View {
                     Spacer()
                     // Grid med klickbara boxar
                     LazyVGrid(columns: columns, alignment: .leading, spacing: 8) {
-                        ForEach(Array(folders.enumerated()), id: \.element.id) { index, folder in
+                        ForEach(folders.indices, id: \.self) { index in
+                            let folder = folders[index]
                             let color = palette[index % palette.count]
-                            
-                            NavigationLink(destination: FolderDetailView(folder: folder)) {
+                            NavigationLink(destination: ChoosedPageView(folder: $folders[index])) {
                                 VStack(alignment: .leading, spacing: 6) {
-                                    // Folder icon
+                                    if let due = folder.dueDate {
+                                        Text(due.formatted(date: .abbreviated, time: .omitted))
+                                            .font(.headline)
+                                            .bold()
+                                            .foregroundStyle(.primary)
+                                    }
                                     Image(systemName: "pencil.and.list.clipboard")
                                         .resizable()
                                         .scaledToFit()
@@ -143,24 +99,24 @@ struct MakeYourOwnList: View {
                                         .frame(height: 44)
                                         .symbolRenderingMode(.monochrome)
                                         .padding(.bottom, 2)
-                                    
-                                    // Title and optional description
                                     Text(folder.title)
                                         .font(.body)
                                         .foregroundStyle(.primary)
                                         .lineLimit(1)
+                                        .truncationMode(.tail)
                                         .frame(maxWidth: .infinity, alignment: .leading)
-                                    
                                     if !folder.description.isEmpty {
                                         Text(folder.description)
                                             .font(.caption)
                                             .foregroundStyle(.secondary)
                                             .lineLimit(2)
+                                            .truncationMode(.tail)
                                             .frame(maxWidth: .infinity, alignment: .leading)
                                     }
                                 }
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 10)
+                                .frame(height: 140)
                                 .background(
                                     RoundedRectangle(cornerRadius: 10, style: .continuous)
                                         .fill(color.opacity(0.5))
@@ -185,8 +141,13 @@ struct MakeYourOwnList: View {
         .onChange(of: folders) { oldValue, newValue in
             saveFolders()
         }
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
+
+// Lightweight local model for the input on sida 2
+private struct DraftCard { var question: String; var answer: String }
 
 #Preview {
     MakeYourOwnList()

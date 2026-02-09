@@ -15,8 +15,10 @@ struct Flashcard: Identifiable, Codable, Hashable {
 
 final class FlashcardStore: ObservableObject {
     private let keyPrefix = "flashcards_"
+    private let laidAsidePrefix = "laidAside_"
 
     private func key(for folderID: UUID) -> String { keyPrefix + folderID.uuidString }
+    private func laidAsideKey(for folderID: UUID) -> String { laidAsidePrefix + folderID.uuidString }
 
     func load(for folderID: UUID) -> [Flashcard] {
         let key = key(for: folderID)
@@ -37,6 +39,32 @@ final class FlashcardStore: ObservableObject {
         } catch {
             print("Kunde inte spara flashcards: \(error)")
         }
+    }
+    
+    func loadLaidAside(for folderID: UUID) -> [Flashcard] {
+        let key = laidAsideKey(for: folderID)
+        guard let data = UserDefaults.standard.data(forKey: key) else { return [] }
+        do {
+            return try JSONDecoder().decode([Flashcard].self, from: data)
+        } catch {
+            print("Kunde inte läsa undanlagda flashcards: \(error)")
+            return []
+        }
+    }
+
+    func saveLaidAside(_ cards: [Flashcard], for folderID: UUID) {
+        let key = laidAsideKey(for: folderID)
+        do {
+            let data = try JSONEncoder().encode(cards)
+            UserDefaults.standard.set(data, forKey: key)
+        } catch {
+            print("Kunde inte spara undanlagda flashcards: \(error)")
+        }
+    }
+
+    func clearLaidAside(for folderID: UUID) {
+        let key = laidAsideKey(for: folderID)
+        UserDefaults.standard.removeObject(forKey: key)
     }
 
     func add(question: String, answer: String, to folderID: UUID) {

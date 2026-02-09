@@ -6,7 +6,7 @@ struct FlashcardsView: View {
     @State private var question: String = ""
     @State private var answer: String = ""
     private let store = FlashcardStore()
-
+    
     var body: some View {
         List {
             Section("Ny flashcard") {
@@ -22,7 +22,7 @@ struct FlashcardsView: View {
                     answer = ""
                 }
             }
-
+            
             Section("Skapade flashcards") {
                 if cards.isEmpty {
                     ContentUnavailableView("Här var det tomt", systemImage: "rectangle.stack.badge.plus", description: Text("Skapa kort ovan."))
