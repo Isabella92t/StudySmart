@@ -41,7 +41,7 @@ struct FlippableCard<Front: View, Back: View>: View {
     }
 }
 
-struct PracticeModeView: View {
+struct FlashcardsPracticeAdvancedView: View {
     let folder: Folder
 
     private let store = FlashcardStore()
@@ -307,10 +307,10 @@ struct PracticeModeView: View {
     }
 }
 
-struct PracticeModeView_Previews: PreviewProvider {
+struct FlashcardsPracticeAdvancedView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationStack {
-            PracticeModeView(folder: Folder(title: "Ämne", description: "Kapitel 1"))
+            FlashcardsPracticeAdvancedView(folder: Folder(title: "Ämne", description: "Kapitel 1"))
         }
     }
 }

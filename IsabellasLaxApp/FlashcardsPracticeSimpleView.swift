@@ -1,7 +1,7 @@
 import SwiftUI
 import Foundation
 
-struct FlashcardsPracticeView: View {
+struct FlashcardsPracticeSimpleView: View {
     var folder: Folder
     private let store = FlashcardStore()
 
@@ -108,6 +108,6 @@ struct FlashcardsPracticeView: View {
 
 #Preview {
     NavigationStack {
-        FlashcardsPracticeView(folder: Folder(title: "Exempel", description: "Övning"))
+        FlashcardsPracticeSimpleView(folder: Folder(title: "Exempel", description: "Övning"))
     }
 }

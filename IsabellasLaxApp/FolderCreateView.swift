@@ -9,7 +9,7 @@ import SwiftUI
 import Foundation
 
 
-struct MakeYourOwnList: View {
+struct FolderCreateView: View {
     
     @State private var title = ""
     @State private var description = ""
@@ -84,7 +84,7 @@ struct MakeYourOwnList: View {
                         ForEach(folders.indices, id: \.self) { index in
                             let folder = folders[index]
                             let color = palette[index % palette.count]
-                            NavigationLink(destination: ChoosedPageView(folder: $folders[index])) {
+                            NavigationLink(destination: FolderOverviewView(folder: $folders[index])) {
                                 VStack(alignment: .leading, spacing: 6) {
                                     if let due = folder.dueDate {
                                         Text(due.formatted(date: .abbreviated, time: .omitted))
@@ -150,6 +150,6 @@ struct MakeYourOwnList: View {
 private struct DraftCard { var question: String; var answer: String }
 
 #Preview {
-    MakeYourOwnList()
+    FolderCreateView()
 }
 

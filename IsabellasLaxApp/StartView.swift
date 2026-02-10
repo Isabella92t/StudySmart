@@ -20,7 +20,7 @@ struct StartView: View {
 
                 Spacer(minLength: 0)
 
-                NavigationLink(destination: MakeYourOwnList()) {
+                NavigationLink(destination: FolderCreateView()) {
                     Text("Start here")
                         .font(.largeTitle)
                         .padding(40)

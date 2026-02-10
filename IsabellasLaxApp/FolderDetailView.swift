@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct ChoosedPageView: View {
+struct FolderOverviewView: View {
     @Binding var folder: Folder
     @State private var showFlashcardOptions = false
     @State private var showFlashcardMenu = false
@@ -8,7 +8,6 @@ struct ChoosedPageView: View {
     @State private var goToPractice = false
     @State private var showDatePicker = false
     @State private var tempDate = Date()
-    @State private var goToSaved = false
     @State private var goToGlossary = false
 
     var body: some View {
@@ -39,13 +38,6 @@ struct ChoosedPageView: View {
                     showDatePicker = true
                 } label: {
                     Label("Datum", systemImage: "calendar")
-                }
-            }
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    goToSaved = true
-                } label: {
-                    Label("Sparade kort", systemImage: "bookmark")
                 }
             }
         }
@@ -144,10 +136,7 @@ struct ChoosedPageView: View {
             FlashcardsEditorView(folder: folder)
         }
         .navigationDestination(isPresented: $goToPractice) {
-            PracticeModeView(folder: folder)
-        }
-        .navigationDestination(isPresented: $goToSaved) {
-            SavedFlashcardsView(folder: folder)
+            FlashcardsPracticeAdvancedView(folder: folder)
         }
         .navigationDestination(isPresented: $goToGlossary) {
             GlossaryPracticeView()
@@ -158,8 +147,8 @@ struct ChoosedPageView: View {
 // Note: This file expects `Folder`, `FlashcardsEditorView`, `PracticeModeView`, and `SavedFlashcardsView` to be available in the module.
 #Preview {
     @State var sampleFolder = Folder(title: "Ämne", description: "Beskrivning")
-    return NavigationStack {
-        ChoosedPageView(folder: $sampleFolder)
+    NavigationStack {
+        FolderOverviewView(folder: $sampleFolder)
     }
 }
 
