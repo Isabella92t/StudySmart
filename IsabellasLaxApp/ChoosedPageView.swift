@@ -9,6 +9,7 @@ struct ChoosedPageView: View {
     @State private var showDatePicker = false
     @State private var tempDate = Date()
     @State private var goToSaved = false
+    @State private var goToGlossary = false
 
     var body: some View {
         List {
@@ -44,7 +45,7 @@ struct ChoosedPageView: View {
                 Button {
                     goToSaved = true
                 } label: {
-                    Label("Sparat", systemImage: "bookmark")
+                    Label("Sparade kort", systemImage: "bookmark")
                 }
             }
         }
@@ -96,17 +97,46 @@ struct ChoosedPageView: View {
             }
         }
         .overlay(alignment: .bottomLeading) {
-            Button {
-                showFlashcardMenu = true
-            } label: {
-                Image(systemName: "rectangle.on.rectangle.angled")
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundStyle(.blue)
-                    .padding(12)
-                    .background(
-                        Circle().fill(Color.blue.opacity(0.15))
-                    )
-                    .accessibilityLabel("Flashcards")
+            HStack(spacing: 16) {
+                Button {
+                    goToPractice = true
+                } label: {
+                    Image(systemName: "rectangle.on.rectangle.angled")
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundStyle(.blue)
+                        .padding(12)
+                        .background(
+                            Circle().fill(Color.blue.opacity(0.15))
+                        )
+                        .accessibilityLabel("Flashcards")
+                }
+
+                Button {
+                    goToCreate = true
+                } label: {
+                    Image(systemName: "rectangle.stack.badge.plus")
+                        .symbolRenderingMode(.hierarchical)
+                        .foregroundStyle(.green)
+                        .font(.system(size: 24, weight: .bold))
+                        .padding(12)
+                        .background(
+                            Circle().fill(Color.green.opacity(0.15))
+                        )
+                        .accessibilityLabel("Lägg till flashcards")
+                }
+                
+                Button {
+                    goToGlossary = true
+                } label: {
+                    Image(systemName: "book")
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundStyle(.purple)
+                        .padding(12)
+                        .background(
+                            Circle().fill(Color.purple.opacity(0.15))
+                        )
+                        .accessibilityLabel("Glosor")
+                }
             }
             .padding([.leading, .bottom], 24)
         }
@@ -119,7 +149,17 @@ struct ChoosedPageView: View {
         .navigationDestination(isPresented: $goToSaved) {
             SavedFlashcardsView(folder: folder)
         }
+        .navigationDestination(isPresented: $goToGlossary) {
+            GlossaryPracticeView()
+        }
     }
 }
 
 // Note: This file expects `Folder`, `FlashcardsEditorView`, `PracticeModeView`, and `SavedFlashcardsView` to be available in the module.
+#Preview {
+    @State var sampleFolder = Folder(title: "Ämne", description: "Beskrivning")
+    return NavigationStack {
+        ChoosedPageView(folder: $sampleFolder)
+    }
+}
+

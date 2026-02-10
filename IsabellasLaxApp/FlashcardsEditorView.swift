@@ -4,19 +4,36 @@ import Foundation
 struct FlashcardsEditorView: View {
     var folder: Folder
     private let store = FlashcardStore()
+    
+    @Environment(\.editMode) private var editMode
+    private let columns = [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)]
+
+    @State private var showDeleteAllConfirm = false
 
     @State private var cards: [Flashcard] = []
     @State private var goToSaved = false
 
     @State private var newQuestion: String = ""
     @State private var newAnswer: String = ""
-    @State private var showSavedBanner = false
+    
+    @State private var showTrashMenu = false
+    @State private var showConfirmDeleteAll = false
+    @State private var showDeleteOneSheet = false
+    @State private var indexToDelete: Int? = nil
+    
+    @State private var isSelecting = false
+    @State private var selectedIndices: Set<Int> = []
+    
+    @FocusState private var focusedField: FieldFocus?
+
+    private enum FieldKind: Hashable { case question, answer }
+    private struct FieldFocus: Hashable { let index: Int; let kind: FieldKind }
 
     var body: some View {
         VStack(spacing: 0) {
             // Add new card section
             VStack(alignment: .leading, spacing: 8) {
-                Text("Lägg till nytt kort").font(.headline)
+                Text("Här kan du skapa glosor").font(.headline)
                 HStack(spacing: 12) {
                     TextField("Fråga...", text: $newQuestion)
                         .textFieldStyle(.roundedBorder)
@@ -25,62 +42,197 @@ struct FlashcardsEditorView: View {
                     Button {
                         addNewCard()
                     } label: {
-                        Label("Spara", systemImage: "tray.and.arrow.down")
+                        Text("Spara")
                     }
+                    .tint(.green)
                     .buttonStyle(.borderedProminent)
                     .disabled(newQuestion.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || newAnswer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                }
-                if showSavedBanner {
-                    Text("Sparat!")
-                        .font(.footnote)
-                        .foregroundStyle(.green)
-                        .transition(.opacity)
                 }
             }
             .padding([.horizontal, .top])
 
             Divider().padding(.vertical, 8)
-
-            // Header row
-            HStack {
-                Text("Sparade kort").font(.headline)
-                Spacer()
-            }
-            .padding(.horizontal)
-
-            List {
-                ForEach(cards.indices, id: \.self) { index in
-                    HStack(spacing: 12) {
-                        TextField("Fråga...", text: $cards[index].question)
-                            .textFieldStyle(.roundedBorder)
-                        TextField("Svar...", text: $cards[index].answer)
-                            .textFieldStyle(.roundedBorder)
+            
+            ScrollView {
+                if editMode?.wrappedValue.isEditing == true {
+                    if isSelecting {
+                        HStack(spacing: 12) {
+                            Button("Markera alla") {
+                                selectedIndices = Set(cards.indices)
+                            }
+                            Button("Avmarkera alla") {
+                                selectedIndices.removeAll()
+                            }
+                            Spacer()
+                            Button(role: .destructive) {
+                                deleteSelected()
+                            } label: {
+                                Text("Radera (\(selectedIndices.count))")
+                            }
+                            .disabled(selectedIndices.isEmpty)
+                        }
+                        .padding(.horizontal)
+                        .padding(.vertical, 6)
                     }
-                    .padding(.vertical, 4)
-                }
-                .onDelete { offsets in
-                    cards.remove(atOffsets: offsets)
-                    store.save(cards.filter { !$0.question.isEmpty && !$0.answer.isEmpty }, for: folder.id)
+                    VStack(alignment: .leading, spacing: 0) {
+                        ForEach(cards.indices, id: \.self) { index in
+                            HStack(spacing: 12) {
+                                if isSelecting {
+                                    Button {
+                                        if selectedIndices.contains(index) {
+                                            selectedIndices.remove(index)
+                                        } else {
+                                            selectedIndices.insert(index)
+                                        }
+                                    } label: {
+                                        Image(systemName: selectedIndices.contains(index) ? "checkmark.circle.fill" : "circle")
+                                            .foregroundColor(selectedIndices.contains(index) ? .accentColor : .secondary)
+                                    }
+                                }
+                                TextField("Fråga...", text: $cards[index].question)
+                                    .textFieldStyle(.roundedBorder)
+                                    .focused($focusedField, equals: FieldFocus(index: index, kind: .question))
+                                    .contentShape(Rectangle())
+                                    .onTapGesture { focusedField = FieldFocus(index: index, kind: .question) }
+                                TextField("Svar...", text: $cards[index].answer)
+                                    .textFieldStyle(.roundedBorder)
+                                    .focused($focusedField, equals: FieldFocus(index: index, kind: .answer))
+                                    .contentShape(Rectangle())
+                                    .onTapGesture { focusedField = FieldFocus(index: index, kind: .answer) }
+                            }
+                            .padding(.horizontal)
+                            .padding(.vertical, 8)
+                            Divider()
+                        }
+                    }
+                    .padding(.top, 4)
+                } else {
+                    if cards.isEmpty {
+                        ContentUnavailableView("Tomt", systemImage: "tray")
+                            .padding(.top, 8)
+                    } else {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Sparade").font(.headline).padding(.horizontal)
+                            VStack(spacing: 8) {
+                                ForEach(Array(cards.enumerated()), id: \.0) { index, card in
+                                    HStack(alignment: .center, spacing: 8) {
+                                        if isSelecting {
+                                            Button {
+                                                if selectedIndices.contains(index) {
+                                                    selectedIndices.remove(index)
+                                                } else {
+                                                    selectedIndices.insert(index)
+                                                }
+                                            } label: {
+                                                Image(systemName: selectedIndices.contains(index) ? "checkmark.circle.fill" : "circle")
+                                                    .foregroundColor(selectedIndices.contains(index) ? .accentColor : .secondary)
+                                            }
+                                        }
+                                        HStack(spacing: 8) {
+                                            VStack(alignment: .leading, spacing: 4) {
+                                                Text(card.question)
+                                                    .font(.subheadline)
+                                                    .foregroundStyle(.primary)
+                                                    .lineLimit(2)
+                                            }
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 10)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .background(
+                                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                                    .fill(Color.gray.opacity(0.08))
+                                            )
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                                    .stroke(Color.gray.opacity(0.25))
+                                            )
+
+                                            VStack(alignment: .leading, spacing: 4) {
+                                                Text(card.answer)
+                                                    .font(.subheadline)
+                                                    .foregroundStyle(.primary)
+                                                    .lineLimit(2)
+                                            }
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 10)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .background(
+                                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                                    .fill(Color.gray.opacity(0.08))
+                                            )
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                                    .stroke(Color.gray.opacity(0.25))
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                            .padding(.horizontal)
+                            .padding(.bottom, 8)
+                        }
+                    }
                 }
             }
-            .listStyle(.plain)
 
             Divider()
             HStack {
                 Spacer()
+
+                // Höger: Redigera/Klar
                 Button {
-                    saveAll()
+                    if editMode?.wrappedValue.isEditing == true {
+                        editMode?.wrappedValue = .inactive
+                        isSelecting = false
+                        selectedIndices.removeAll()
+                        focusedField = nil
+                    } else {
+                        editMode?.wrappedValue = .active
+                        isSelecting = true
+                        selectedIndices.removeAll()
+                    }
                 } label: {
-                    Label("Spara ändringar", systemImage: "tray.and.arrow.down")
+                    Text(editMode?.wrappedValue.isEditing == true ? "Klar" : "Redigera")
                 }
-                .buttonStyle(.borderedProminent)
-                Spacer()
+                .buttonStyle(.bordered)
+                if isSelecting {
+                    Spacer().frame(width: 8)
+                    Button("Markera alla") {
+                        selectedIndices = Set(cards.indices)
+                    }
+                    .buttonStyle(.bordered)
+                    Button(role: .destructive) {
+                        deleteSelected()
+                    } label: {
+                        Text("Radera (\(selectedIndices.count))")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(selectedIndices.isEmpty)
+                }
             }
-            .padding(.bottom)
+            .padding(.horizontal)
+            .padding(.vertical, 8)
         }
-        .navigationTitle("Spara glosor")
+        .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+        }
         .onAppear { loadCards() }
+    }
+
+    private func deleteSelected() {
+        guard !selectedIndices.isEmpty else { return }
+        let toDelete = selectedIndices
+        var remaining: [Flashcard] = []
+        for (idx, card) in cards.enumerated() {
+            if !toDelete.contains(idx) {
+                remaining.append(card)
+            }
+        }
+        cards = remaining
+        selectedIndices.removeAll()
+        isSelecting = false
+        store.save(cards.filter { !$0.question.isEmpty && !$0.answer.isEmpty }, for: folder.id)
     }
 
     private func loadCards() {
@@ -98,11 +250,6 @@ struct FlashcardsEditorView: View {
         let toPersist = cleaned.filter { !$0.question.isEmpty && !$0.answer.isEmpty }
         store.save(toPersist, for: folder.id)
         cards = cleaned
-
-        withAnimation { showSavedBanner = true }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-            withAnimation { showSavedBanner = false }
-        }
     }
 
     private func addNewCard() {
@@ -115,9 +262,13 @@ struct FlashcardsEditorView: View {
         cards = current
         newQuestion = ""
         newAnswer = ""
-        withAnimation { showSavedBanner = true }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-            withAnimation { showSavedBanner = false }
-        }
     }
 }
+
+#Preview {
+    @State var sampleFolder = Folder(title: "Exempel", description: "Förhandsvisning")
+    return NavigationStack {
+        FlashcardsEditorView(folder: sampleFolder)
+    }
+}
+

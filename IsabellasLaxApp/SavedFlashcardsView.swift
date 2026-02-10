@@ -6,14 +6,15 @@ struct SavedFlashcardsView: View {
     private let store = FlashcardStore()
     @State private var cards: [Flashcard] = []
     @Environment(\.editMode) private var editMode
+    private let columns = [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)]
 
     var body: some View {
         List {
             if cards.isEmpty {
                 ContentUnavailableView("Inget sparat ännu", systemImage: "tray")
             } else {
-                Section(header: Text("Sparade kort").font(.headline)) {
-                    if editMode?.wrappedValue.isEditing == true {
+                if editMode?.wrappedValue.isEditing == true {
+                    Section(header: Text("Sparade kort").font(.headline)) {
                         ForEach($cards) { $card in
                             HStack(spacing: 12) {
                                 TextField("Fråga...", text: $card.question)
@@ -29,18 +30,35 @@ struct SavedFlashcardsView: View {
                             store.save(cleaned, for: folder.id)
                             cards = cleaned
                         }
-                    } else {
-                        ForEach(cards) { card in
-                            VStack(alignment: .leading, spacing: 6) {
-                                Text(card.question)
-                                    .font(.headline)
-                                    .foregroundStyle(.primary)
-                                Text(card.answer)
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
+                    }
+                } else {
+                    Section(header: Text("Sparade kort").font(.headline)) {
+                        LazyVGrid(columns: columns, alignment: .leading, spacing: 8) {
+                            ForEach(cards) { card in
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(card.question)
+                                        .font(.subheadline)
+                                        .foregroundStyle(.primary)
+                                        .lineLimit(2)
+                                    Text(card.answer)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(2)
+                                }
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 8)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                        .fill(Color.gray.opacity(0.08))
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                        .stroke(Color.gray.opacity(0.25))
+                                )
                             }
-                            .padding(.vertical, 6)
                         }
+                        .padding(.vertical, 4)
                     }
                 }
             }
