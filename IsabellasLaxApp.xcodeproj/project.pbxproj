@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		5ECDA0DA2F16C575004D8FA3 /* IsabellasLaxApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IsabellasLaxApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5ECDA0DA2F16C575004D8FA3 /* StudySmart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StudySmart.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -40,7 +40,7 @@
 		5ECDA0DB2F16C575004D8FA3 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				5ECDA0DA2F16C575004D8FA3 /* IsabellasLaxApp.app */,
+				5ECDA0DA2F16C575004D8FA3 /* StudySmart.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,9 +48,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		5ECDA0D92F16C575004D8FA3 /* IsabellasLaxApp */ = {
+		5ECDA0D92F16C575004D8FA3 /* StudySmart */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 5ECDA0E52F16C576004D8FA3 /* Build configuration list for PBXNativeTarget "IsabellasLaxApp" */;
+			buildConfigurationList = 5ECDA0E52F16C576004D8FA3 /* Build configuration list for PBXNativeTarget "StudySmart" */;
 			buildPhases = (
 				5ECDA0D62F16C575004D8FA3 /* Sources */,
 				5ECDA0D72F16C575004D8FA3 /* Frameworks */,
@@ -63,11 +63,11 @@
 			fileSystemSynchronizedGroups = (
 				5ECDA0DC2F16C575004D8FA3 /* IsabellasLaxApp */,
 			);
-			name = IsabellasLaxApp;
+			name = StudySmart;
 			packageProductDependencies = (
 			);
 			productName = IsabellasLaxApp;
-			productReference = 5ECDA0DA2F16C575004D8FA3 /* IsabellasLaxApp.app */;
+			productReference = 5ECDA0DA2F16C575004D8FA3 /* StudySmart.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -99,7 +99,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				5ECDA0D92F16C575004D8FA3 /* IsabellasLaxApp */,
+				5ECDA0D92F16C575004D8FA3 /* StudySmart */,
 			);
 		};
 /* End PBXProject section */
@@ -322,7 +322,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		5ECDA0E52F16C576004D8FA3 /* Build configuration list for PBXNativeTarget "IsabellasLaxApp" */ = {
+		5ECDA0E52F16C576004D8FA3 /* Build configuration list for PBXNativeTarget "StudySmart" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				5ECDA0E62F16C576004D8FA3 /* Debug */,
