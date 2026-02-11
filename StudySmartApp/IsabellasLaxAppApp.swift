@@ -12,6 +12,7 @@ struct IsabellasLaxAppApp: App {
     var body: some Scene {
         WindowGroup {
             StartView()
-        }
-    }
+                    }
+                }
+        
 }

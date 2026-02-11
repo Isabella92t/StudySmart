@@ -11,6 +11,8 @@ struct FolderOverviewView: View {
     @State private var goToGlossary = false
 
     var body: some View {
+        
+        
         List {
             Section {
                 VStack(alignment: .leading, spacing: 8) {
@@ -30,17 +32,20 @@ struct FolderOverviewView: View {
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
         .background(Color(.systemBackground))
-        .navigationTitle(folder.title)
-        .navigationBarTitleDisplayMode(.inline)
+       
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     showDatePicker = true
                 } label: {
-                    Label("Datum", systemImage: "calendar")
+                    Image(systemName: "calendar")
+                        .font(.title)
                 }
+                
             }
+        
         }
+
         .sheet(isPresented: $showDatePicker) {
             NavigationStack {
                 VStack(spacing: 16) {
@@ -49,10 +54,9 @@ struct FolderOverviewView: View {
                         .padding(.horizontal)
                     Spacer()
                 }
-                .navigationTitle("Välj datum")
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("Avbryt") { showDatePicker = false }
+                        Button("X") { showDatePicker = false }
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Spara") {
@@ -63,6 +67,7 @@ struct FolderOverviewView: View {
                 }
             }
         }
+
         .sheet(isPresented: $showFlashcardMenu) {
             NavigationStack {
                 List {
@@ -88,13 +93,14 @@ struct FolderOverviewView: View {
                 }
             }
         }
-        .overlay(alignment: .bottomLeading) {
+
+        .overlay(alignment: .bottom) {
             HStack(spacing: 16) {
                 Button {
                     goToPractice = true
                 } label: {
                     Image(systemName: "rectangle.on.rectangle.angled")
-                        .font(.system(size: 24, weight: .bold))
+                        .font(.system(size: 70, weight: .bold))
                         .foregroundStyle(.blue)
                         .padding(12)
                         .background(
@@ -109,19 +115,19 @@ struct FolderOverviewView: View {
                     Image(systemName: "rectangle.stack.badge.plus")
                         .symbolRenderingMode(.hierarchical)
                         .foregroundStyle(.green)
-                        .font(.system(size: 24, weight: .bold))
-                        .padding(12)
+                        .font(.system(size: 70, weight: .bold))
+                        .padding(11)
                         .background(
                             Circle().fill(Color.green.opacity(0.15))
                         )
                         .accessibilityLabel("Lägg till flashcards")
                 }
-                
+
                 Button {
                     goToGlossary = true
                 } label: {
                     Image(systemName: "book")
-                        .font(.system(size: 24, weight: .bold))
+                        .font(.system(size: 70, weight: .bold))
                         .foregroundStyle(.purple)
                         .padding(12)
                         .background(
@@ -130,8 +136,10 @@ struct FolderOverviewView: View {
                         .accessibilityLabel("Glosor")
                 }
             }
-            .padding([.leading, .bottom], 24)
+            .frame(maxWidth: .infinity)
+            .padding(.bottom, 80)
         }
+
         .navigationDestination(isPresented: $goToCreate) {
             FlashcardsEditorView(folder: folder)
         }
@@ -144,11 +152,9 @@ struct FolderOverviewView: View {
     }
 }
 
-// Note: This file expects `Folder`, `FlashcardsEditorView`, `PracticeModeView`, and `SavedFlashcardsView` to be available in the module.
 #Preview {
-    @State var sampleFolder = Folder(title: "Ämne", description: "Beskrivning")
+    @State var sampleFolder = Folder(title: "Ämne", description: "Beskrivning av det som ska göras")
     NavigationStack {
         FolderOverviewView(folder: $sampleFolder)
     }
 }
-
