@@ -11,28 +11,38 @@ struct StartView: View {
 
     var body: some View {
         NavigationStack {
-            VStack {
-                Text("StudySmart")
-                    .font(.largeTitle)
-                    .padding(.top)
+            ZStack {
+               AppBackground()
+                
+                VStack {
+                    
+                    HStack {Text("StudySmart")
+                            .font(.largeTitle)
+                        Image(systemName: "bird")
+                            .font(.largeTitle)
+                
+                    }
+                    .padding(.top, 120)
 
-                Text("Make it easier for your projects")
+                    Text("Gör det enklare")
+                  
+                    
+                    Spacer(minLength: 0)
 
-                Spacer(minLength: 0)
+                    NavigationLink(destination: FolderCreateView()) {
+                        Text("Start here")
+                            .font(.largeTitle)
+                            .padding(40)
+                            .foregroundStyle(.black)
+                            .background(Color.green)
+                            .cornerRadius(60)
+                    }
+                    .padding(.bottom, 10)
 
-                NavigationLink(destination: FolderCreateView()) {
-                    Text("Start here")
-                        .font(.largeTitle)
-                        .padding(40)
-                        .foregroundStyle(.black)
-                        .background(Color.green)
-                        .cornerRadius(60)
+                    Spacer()
                 }
-                .padding(.bottom, 24)
-
-                Spacer()
+                .frame(maxWidth: .infinity, alignment: .top)
             }
-            .padding(.top, 100)
         }
     }
 }
@@ -43,3 +53,11 @@ struct StartView_Previews: PreviewProvider {
     }
 }
 
+import SwiftUI
+
+struct AppBackground: View {
+    var body: some View {
+        Color(red: 227/255, green: 244/255, blue: 220/255)
+            .ignoresSafeArea()
+    }
+}

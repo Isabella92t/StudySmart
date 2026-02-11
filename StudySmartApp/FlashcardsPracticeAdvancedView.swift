@@ -16,7 +16,7 @@ struct FlippableCard<Front: View, Back: View>: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(isFlipped ? Color.blue.opacity(0.25) : Color.blue.opacity(0.15))
+                .fill(isFlipped ? Color.green.opacity(0.25) : Color.yellow.opacity(0.15))
                 .shadow(radius: 4)
                 .animation(.easeInOut, value: isFlipped)
 
@@ -59,50 +59,28 @@ struct FlashcardsPracticeAdvancedView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            Text(folder.title)
-                .font(.title2)
-                .bold()
-                .padding(.top)
 
             if finished {
                 VStack(spacing: 12) {
                     Image(systemName: "checkmark.seal.fill")
                         .font(.system(size: 48))
                         .foregroundStyle(.green)
-                    Text("Klar!")
-                        .font(.title2)
-                        .bold()
-                    Text("Du har övat färdigt alla kort.")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                       
 
                     if !laidAside.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
                                 Image(systemName: "tray")
-                                Text("Undanlagda kort (") + Text("\(laidAside.count)") + Text(")")
+                                Text("Undanlagda kort (\(laidAside.count))")
                             }
                             .font(.headline)
 
-                            // A compact list/box of laid-aside items
-                            VStack(alignment: .leading, spacing: 6) {
-                                ForEach(laidAside.prefix(5)) { card in
-                                    Text("• \(card.question)")
-                                        .font(.subheadline)
-                                        .foregroundStyle(.secondary)
-                                        .lineLimit(1)
-                                }
-                                if laidAside.count > 5 {
-                                    Text("… och \(laidAside.count - 5) fler")
-                                        .font(.footnote)
-                                        .foregroundStyle(.tertiary)
-                                }
-                            }
-
+                         
+                   
                             Button {
                                 practiceLaidAside()
                             } label: {
-                                Label("Öva undanlagda", systemImage: "arrow.triangle.2.circlepath")
+                                Label("Öva på undanlagda", systemImage: "arrow.triangle.2.circlepath")
                             }
                             .buttonStyle(.borderedProminent)
                             
@@ -110,7 +88,7 @@ struct FlashcardsPracticeAdvancedView: View {
                                 laidAside = []
                                 store.clearLaidAside(for: folder.id)
                             } label: {
-                                Label("Rensa undanlagda", systemImage: "trash")
+                                Label("Rensa alla", systemImage: "trash")
                             }
                             .buttonStyle(.bordered)
                         }
@@ -122,11 +100,12 @@ struct FlashcardsPracticeAdvancedView: View {
                     Button("Börja om") { restart() }
                         .buttonStyle(.bordered)
                 }
+                .font(.title3)
                 .padding()
             } else if shuffledCards.isEmpty {
                 ContentUnavailableView(
                     "Inga flashcards",
-                    systemImage: "rectangle.stack.badge.plus",
+                    systemImage: "rectangle.stack.badge.minus",
                     description: Text("Lägg till flashcards för att börja öva.")
                 )
                 .padding()
@@ -136,18 +115,19 @@ struct FlashcardsPracticeAdvancedView: View {
                         FlippableCard(isFlipped: $showingAnswer) {
                             VStack(spacing: 8) {
                                 Text(shuffledCards[currentIndex].question)
-                                    .font(.title3)
+                                    .font(.system(size: 48))
                                     .multilineTextAlignment(.center)
                                     .padding()
                                 Text("(Fråga)")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
+                                    
                             }
                             .padding()
                         } back: {
                             VStack(spacing: 8) {
                                 Text(shuffledCards[currentIndex].answer)
-                                    .font(.title3)
+                                    .font(.system(size: 48))
                                     .multilineTextAlignment(.center)
                                     .padding()
                                 Text("(Svar)")
@@ -156,7 +136,7 @@ struct FlashcardsPracticeAdvancedView: View {
                             }
                             .padding()
                         }
-                        .frame(maxWidth: .infinity, minHeight: 220, maxHeight: 320)
+                        .frame(maxWidth: .infinity, minHeight: 100, maxHeight: 200)
                         .padding(.horizontal)
                         .contentShape(Rectangle())
                         .onTapGesture {
@@ -165,11 +145,11 @@ struct FlashcardsPracticeAdvancedView: View {
                             }
                         }
 
-                        HStack(spacing: 16) {
+                        HStack(spacing: 48) {
                             Button {
                                 mark(correct: false)
                             } label: {
-                                Label("Lägg undan", systemImage: "xmark.circle")
+                                Image(systemName: "xmark.circle")
                             }
                             .buttonStyle(.bordered)
                             .tint(.red)
@@ -187,11 +167,13 @@ struct FlashcardsPracticeAdvancedView: View {
                                         layAsidePressed = false
                                     }
                             )
+                            
+                     
 
                             Button {
                                 mark(correct: true)
                             } label: {
-                                Label("Nästa", systemImage: "checkmark.circle")
+                                Image(systemName: "checkmark.circle")
                             }
                             .buttonStyle(.borderedProminent)
                             .tint(.green)
@@ -205,7 +187,7 @@ struct FlashcardsPracticeAdvancedView: View {
                             VStack(alignment: .leading, spacing: 8) {
                                 HStack(spacing: 8) {
                                     Image(systemName: "tray")
-                                    Text("Undanlagda (") + Text("\(laidAside.count)") + Text(")")
+                                    Text("Undanlagda (\(laidAside.count))")
                                 }
                                 .font(.headline)
 
@@ -226,16 +208,16 @@ struct FlashcardsPracticeAdvancedView: View {
                                 Button {
                                     practiceLaidAside()
                                 } label: {
-                                    Label("Öva undanlagda", systemImage: "arrow.triangle.2.circlepath")
+                                    Label("", systemImage: "arrow.triangle.2.circlepath")
                                 }
                                 .buttonStyle(.bordered)
                             }
                             .padding()
-                            .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.gray.opacity(0.07)))
+                            .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.white.opacity(0.07)))
                         }
                     } else {
                         ContentUnavailableView(
-                            "Inga flashcards",
+                            "Tomt",
                             systemImage: "rectangle.stack.badge.plus",
                             description: Text("Lägg till flashcards för att börja öva.")
                         )
@@ -245,7 +227,7 @@ struct FlashcardsPracticeAdvancedView: View {
                 .padding()
             }
         }
-        .navigationTitle("Övningsläge")
+        .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             cards = store.load(for: folder.id)
